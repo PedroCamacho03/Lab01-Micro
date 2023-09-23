@@ -281,7 +281,7 @@ void lcdDonoDaSenha(){
 }
 void senhaIncorretaFuncao(){
   if (senhaIncorreta == 6){
-    Serial.println("Esta aqui");
+    Serial.println("SISTEMA BLOQUEADO");
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Senha Incorreta!");
