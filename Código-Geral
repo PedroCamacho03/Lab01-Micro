@@ -33,18 +33,18 @@
 
 LiquidCrystal lcd(RS, RW, EN, D4, D5, D6, D7);
 
-const int L0 = PL_0, L1 = PL_1, L2 = PL_2, L3 = PL_3, C0 = PM_4, C1 = PM_5, C2 = PM_6, C3 = PM_7; 
+const int L0 = PL_0, L1 = PL_1, L2 = PL_2, L3 = PL_3, C0 = PM_4, C1 = PM_5, C2 = PM_6; 
 const byte ROWS = 4; 
-const byte COLS = 4; 
+const byte COLS = 3; 
 
 char hexaKeys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
 };
 byte rowPins[ROWS] = {L0, L1, L2, L3}; 
-byte colPins[COLS] = {C0, C1, C2, C3}; 
+byte colPins[COLS] = {C0, C1, C2}; 
 
 Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
 
@@ -63,12 +63,14 @@ char senhas[6][6] = {
   {'1','3','5','7','9','6'},//Senha Lana 2
   {'2','2','3','3','3','3'},//Senha Marco 1
   {'1','2','9','4','7','2'},//Senha Marco 2
-  {'3','9','3','4','5','6'},//Senha Pedro 1
-  {'4','2','6','4','7','6'}//Senha Pedro 2
+  {'2','7','0','3','0','3'},//Senha Pedro 1
+  {'0','0','0','0','0','0'}//Senha Pedro 2
 };
 
 char senhaTeclado[6];
-int i = 0, senhaCorreta = 0, senhaIncorreta = 0, donoDaSenha = 0, displayCount = 4;
+char NovaSenha[6];
+char senhaTemp[6];
+int i = 0, h=0, senhaCorreta = 0, senhaIncorreta = 0, donoDaSenha = 0, displayCount = 4;
 bool senhaDigitada = false;
 bool apagarLinhaInteira = false;
 bool voltarMenuSenhas = false;
@@ -113,7 +115,7 @@ void setup() {
 
 void loop() {
   if(segurarCincoSeg){
-    Serial.print("Comecou a girar o motor");
+    Serial.println("Comecou a girar o motor");
     motorPasso.step(180/0.175781);
     Serial.println("Terminou de girar o motor");
     tempo = millis();
@@ -124,7 +126,7 @@ void loop() {
     segurarCincoSeg = false;
   }
   if(voltarMenuSenhas){
-    Serial.println("Entrou no voltar menu senhas");
+    //Serial.println("Entrou no voltar menu senhas");
     if (millis()-tempo >= 7000){
       digitalWrite(TRANSISTOR2, LOW);
       Serial.println("Girando motor de volta a posicao inicial");
@@ -157,13 +159,16 @@ void loop() {
 void getSenha(){
   leitura_teclas = customKeypad.getKey(); //Le o teclado matricial
   while (leitura_teclas != 0 && !voltarMenuSenhas){ //Quando apertam uma tecla entra aqui
-    //Serial.println(leitura_teclas);
+    Serial.println(leitura_teclas);
     //Serial.println(i);
     if (leitura_teclas != '*' && leitura_teclas != '#'){ //Armazena a entrada do teclado matricual em um vetor de 6 posições
       senhaTeclado[i] = leitura_teclas;
       lcd.setCursor(i+6,1); //escreve o *
       lcd.print('*');
       i++;
+    }
+    if(i==0 && leitura_teclas=='*'){
+      changeSenha();
     }
     if(leitura_teclas == '#'){ //Apaga a senha
       if(apagarLinhaInteira){ //Serve para apagar a linha de baixso do diusplay quando usuário digita mais de 6 caracteres de senha, so entra aqui se o cara digitiar mais de 6 caracteres e apertar #
@@ -234,72 +239,48 @@ void checkSenha(){
 void lcdDonoDaSenha(){
   switch (donoDaSenha){
      case 1:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Senha Correta!");
-      lcd.setCursor(0,1);
-      lcd.print("Ola Lana");
-      Serial.println("Entrou no case 1");
-      segurarCincoSeg = true;
-      donoDaSenha = 0;
-      senhaIncorreta = 0;
-      break;
      case 2:
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Senha Correta!");
       lcd.setCursor(0,1);
       lcd.print("Ola Lana");
+      Serial.println("LANA");
       segurarCincoSeg = true;
       donoDaSenha = 0;
       senhaIncorreta = 0;
       break;
      case 3:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Senha Correta!");
-      lcd.setCursor(0,1);
-      lcd.print("Ola Marco");
-      segurarCincoSeg = true;
-      donoDaSenha = 0;
-      senhaIncorreta = 0;
-      break;
      case 4:
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Senha Correta!");
       lcd.setCursor(0,1);
       lcd.print("Ola Marco");
+      Serial.println("MARCO");
       segurarCincoSeg = true;
       donoDaSenha = 0;
       senhaIncorreta = 0;
       break;
      case 5:
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print("Senha Correta!");
-      lcd.setCursor(0,1);
-      lcd.print("Ola Pedro");
-      segurarCincoSeg = true;
-      donoDaSenha = 0;
-      senhaIncorreta = 0;
-      break;
      case 6:
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Senha Correta!");
       lcd.setCursor(0,1);
       lcd.print("Ola Pedro");
+      Serial.println("PEDRO");
       segurarCincoSeg = true;
       donoDaSenha = 0;
       senhaIncorreta = 0;
-     defaut:
+      break;
+     default:
       break; 
   }
 }
 void senhaIncorretaFuncao(){
   if (senhaIncorreta == 6){
-    Serial.println("Esta aquio");
+    Serial.println("Esta aqui");
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Senha Incorreta!");
@@ -314,4 +295,139 @@ void senhaIncorretaFuncao(){
     senhaIncorreta = 0;
   }
 }
+void changeSenha(){
+  int user = 0;     //numero do usuario (1-Lana, 2-Marco, 3-Pedro)   APENAS PARA FACILITAR
+  int n_senha = 0;  //numero da sena (1 ou 2)                        NA ESCRITA DENTRO DA MATRIZ     
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Troca de Senha");
+  Serial.println("TROCA DE SENHA");
+  lcd.setCursor(0,1);
+  lcd.print("Usuario: ");
+  while((user != 1)&&(user != 2)&&(user != 3)){  //para repetir a leitura caso nao digite numero valido (aqui 1, 2 ou 3)
+  leitura_teclas = customKeypad.waitForKey();
+  Serial.println(leitura_teclas);
+    switch (leitura_teclas){
+      case '1':
+        user = 1;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Usuario: Lana");
+        lcd.setCursor(0,1);
+        lcd.print("Senha: ");
+        Serial.println("LANA");
+        break;
+      case '2':
+        user = 2;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Usuario: Marco");
+        lcd.setCursor(0,1);
+        lcd.print("Senha: ");
+        Serial.println("MARCO");
+        break;
+      case '3':
+        user = 3;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Usuario: Pedro");
+        lcd.setCursor(0,1);
+        lcd.print("Senha: ");
+        Serial.println("PEDRO");
+        break;
+      default:
+        user = 0;
+        lcd.setCursor(0,0);
+        lcd.print("Usuario Invalido");
+        lcd.setCursor(0,1);
+        lcd.print("Digite Novamente");
+        break; 
+    }
+  }
+  while((n_senha!=1)&&(n_senha!=2)){
+    leitura_teclas = customKeypad.waitForKey();
+    Serial.println(leitura_teclas);
+    switch (leitura_teclas){
+      case '1':
+        n_senha = 1;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Senha: 1");
+        lcd.setCursor(0,1);
+        lcd.print("Nova: ");
+        Serial.println("SENHA 1");
+        getNovaSenha(user, n_senha);
+        break;
+      case '2':
+        n_senha = 2;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Senha: 2");
+        lcd.setCursor(0,1);
+        lcd.print("Nova: ");
+        Serial.println("SENHA 2");
+        getNovaSenha(user, n_senha);
+        break;
+      default:
+        n_senha = 0;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print("Senha Invalida");
+        lcd.setCursor(0,1);
+        lcd.print("Digite Novamente");
+        break;
+    }
+  }
+  for(h=0; h<6; h++){
+    senhas[2*(user-1)+(n_senha-1)][h] = NovaSenha[h];
+  }
+  Serial.println("SENHA TROCADA");
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Bem Vindo!");
+  lcd.setCursor(0,1);
+  lcd.print("Senha:");
+}
 
+void getNovaSenha(int user, int senha){
+  h = 0;
+  while(h<7){
+    leitura_teclas = customKeypad.waitForKey();
+    Serial.println(leitura_teclas);
+    switch (leitura_teclas){
+     case '#':         
+     if(h!=0){            //apaga
+       h = 0;
+       lcd.setCursor(0,1);
+       lcd.print("Nova:       ");
+     }else{              //desistencia de troca de senha, aperar # sem digitar
+       for(int j=0; j<6; j++){
+         NovaSenha[j] = senhas[2*(user-1)+(senha-1)][j];
+       }
+       h=7;
+     }
+     break;
+     case '*':
+     if(h==6){
+       for(int j=0; j<6; j++){
+         NovaSenha[j] = senhaTemp[j];
+       }
+     }else{
+       lcd.setCursor(0,1);
+       lcd.print("Pressione #     ");
+     }
+     h++;
+     break;
+      default:
+     if(h<6){
+       lcd.setCursor(6+h,1);
+       lcd.print("*");
+        senhaTemp[h] = leitura_teclas;
+      }else{
+        lcd.setCursor(0,1);
+        lcd.print("Pressione #");
+      }
+      h++;
+    }
+  }
+}
