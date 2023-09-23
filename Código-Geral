@@ -52,7 +52,7 @@ byte numDigitos = 1;
 byte digitPinos[] = {};
 byte pinosDisplay[] = {D1A, D1B, D1C, D1D, D1E, D1F, D1G, D1P};
 bool resistores = true;
-
+bool pulaTroca = false;
 
 SevSeg setSeg;
 
@@ -111,6 +111,7 @@ void setup() {
   setSeg.begin(COMMON_CATHODE, numDigitos, digitPinos, pinosDisplay, resistores);
   setSeg.setBrightness(90);
   motorPasso.setSpeed(60);
+  customKeypad.setDebounceTime(50);
 }
 
 void loop() {
@@ -298,17 +299,18 @@ void senhaIncorretaFuncao(){
 void changeSenha(){
   int user = 0;     //numero do usuario (1-Lana, 2-Marco, 3-Pedro)   APENAS PARA FACILITAR
   int n_senha = 0;  //numero da sena (1 ou 2)                        NA ESCRITA DENTRO DA MATRIZ     
+  pulaTroca = false;
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Troca de Senha");
   Serial.println("TROCA DE SENHA");
   lcd.setCursor(0,1);
   lcd.print("Usuario: ");
-  while((user != 1)&&(user != 2)&&(user != 3)){  //para repetir a leitura caso nao digite numero valido (aqui 1, 2 ou 3)
-  leitura_teclas = customKeypad.waitForKey();
-  Serial.println(leitura_teclas);
-    switch (leitura_teclas){
-      case '1':
+  while((user != 1)&&(user != 2)&&(user != 3)&&(pulaTroca == false)){  //para repetir a leitura caso nao digite numero valido (aqui 1, 2 ou 3)
+    leitura_teclas = customKeypad.waitForKey();
+    Serial.println(leitura_teclas);
+      switch (leitura_teclas){
+        case '1':
         user = 1;
         lcd.clear();
         lcd.setCursor(0,0);
@@ -317,7 +319,7 @@ void changeSenha(){
         lcd.print("Senha: ");
         Serial.println("LANA");
         break;
-      case '2':
+        case '2':
         user = 2;
         lcd.clear();
         lcd.setCursor(0,0);
@@ -326,7 +328,7 @@ void changeSenha(){
         lcd.print("Senha: ");
         Serial.println("MARCO");
         break;
-      case '3':
+        case '3':
         user = 3;
         lcd.clear();
         lcd.setCursor(0,0);
@@ -335,7 +337,10 @@ void changeSenha(){
         lcd.print("Senha: ");
         Serial.println("PEDRO");
         break;
-      default:
+        case '#':
+        pulaTroca = true;
+        break;
+        default:
         user = 0;
         lcd.setCursor(0,0);
         lcd.print("Usuario Invalido");
@@ -344,7 +349,7 @@ void changeSenha(){
         break; 
     }
   }
-  while((n_senha!=1)&&(n_senha!=2)){
+  while((n_senha!=1)&&(n_senha!=2)&&(pulaTroca==false)){
     leitura_teclas = customKeypad.waitForKey();
     Serial.println(leitura_teclas);
     switch (leitura_teclas){
@@ -368,6 +373,9 @@ void changeSenha(){
         Serial.println("SENHA 2");
         getNovaSenha(user, n_senha);
         break;
+      case '#':
+        pulaTroca = true;
+        break;  
       default:
         n_senha = 0;
         lcd.clear();
@@ -378,8 +386,10 @@ void changeSenha(){
         break;
     }
   }
-  for(h=0; h<6; h++){
-    senhas[2*(user-1)+(n_senha-1)][h] = NovaSenha[h];
+  if(pulaTroca==false){
+    for(h=0; h<6; h++){
+      senhas[2*(user-1)+(n_senha-1)][h] = NovaSenha[h];
+    }
   }
   Serial.println("SENHA TROCADA");
   lcd.clear();
@@ -401,9 +411,7 @@ void getNovaSenha(int user, int senha){
        lcd.setCursor(0,1);
        lcd.print("Nova:       ");
      }else{              //desistencia de troca de senha, aperar # sem digitar
-       for(int j=0; j<6; j++){
-         NovaSenha[j] = senhas[2*(user-1)+(senha-1)][j];
-       }
+       pulaTroca = true;
        h=7;
      }
      break;
@@ -418,7 +426,7 @@ void getNovaSenha(int user, int senha){
      }
      h++;
      break;
-      default:
+     default:
      if(h<6){
        lcd.setCursor(6+h,1);
        lcd.print("*");
