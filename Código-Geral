@@ -63,10 +63,10 @@ Stepper motorPasso(500, IN1, IN3, IN2, IN4);
 char senhas[6][6] = {
   {'1','2','3','4','5','6'},//Senha Lana 1
   {'1','3','5','7','9','6'},//Senha Lana 2
-  {'2','2','3','3','3','3'},//Senha Marco 1
+  {'2','2','2','3','3','3'},//Senha Marco 1
   {'1','2','9','4','7','2'},//Senha Marco 2
   {'2','7','0','3','0','3'},//Senha Pedro 1
-  {'0','0','0','0','0','0'}//Senha Pedro 2
+  {'7','8','2','2','7','8'} //Senha Pedro 2
 };
 
 char senhaTeclado[6];
@@ -121,6 +121,9 @@ void loop() {
   if(segurarCincoSeg){
     Serial.println("Comecou a girar o motor");
     tom(700,1000);
+    //digital.Write(BUZZER, HIGH);
+    //delay(1000);
+    //digital.Write(BUZZER, LOW);
     motorPasso.step(180/0.175781);
     Serial.println("Terminou de girar o motor");
     tempo = millis();
@@ -165,8 +168,10 @@ void getSenha(){
   leitura_teclas = customKeypad.getKey(); //Le o teclado matricial
   while (leitura_teclas != 0 && !voltarMenuSenhas){ //Quando apertam uma tecla entra aqui
     Serial.println(leitura_teclas);
-    //Serial.println(i);
     tom(500,100);
+    //digital.Write(BUZZER, HIGH);
+    //delay(100);
+    //digital.Write(BUZZER, LOW);
     if (leitura_teclas != '*' && leitura_teclas != '#'){ //Armazena a entrada do teclado matricual em um vetor de 6 posições
       senhaTeclado[i] = leitura_teclas;
       lcd.setCursor(i+6,1); //escreve o *
@@ -292,8 +297,10 @@ void senhaIncorretaFuncao(){
     lcd.print("Senha Incorreta!");
     lcd.setCursor(0,1);
     lcd.print("Aguarde 3 seg");
-    //delay(3000);
     tom(700,3000);
+    //digital.Write(BUZZER, HIGH);
+    //delay(3000);
+    //digital.Write(BUZZER, LOW);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Bem Vindo!");
@@ -314,6 +321,10 @@ void changeSenha(){
   lcd.print("Usuario: ");
   while((user != 1)&&(user != 2)&&(user != 3)&&(pulaTroca == false)){  //para repetir a leitura caso nao digite numero valido (aqui 1, 2 ou 3)
     leitura_teclas = customKeypad.waitForKey();
+    tom(500,100);
+    //digital.Write(BUZZER, HIGH);
+    //delay(100);
+    //digital.Write(BUZZER, LOW);
     Serial.println(leitura_teclas);
       switch (leitura_teclas){
         case '1':
@@ -357,6 +368,10 @@ void changeSenha(){
   }
   while((n_senha!=1)&&(n_senha!=2)&&(pulaTroca==false)){
     leitura_teclas = customKeypad.waitForKey();
+    tom(500,100);
+    //digital.Write(BUZZER, HIGH);
+    //delay(100);
+    //digital.Write(BUZZER, LOW);
     Serial.println(leitura_teclas);
     switch (leitura_teclas){
       case '1':
@@ -396,6 +411,10 @@ void changeSenha(){
     for(h=0; h<6; h++){
       senhas[2*(user-1)+(n_senha-1)][h] = NovaSenha[h];
     }
+    tom(700, 1000);
+    //digital.Write(BUZZER, HIGH);
+    //delay(1000);
+    //digital.Write(BUZZER, LOW);
   }
   Serial.println("SENHA TROCADA");
   lcd.clear();
@@ -409,6 +428,10 @@ void getNovaSenha(int user, int senha){
   h = 0;
   while(h<7){
     leitura_teclas = customKeypad.waitForKey();
+    tom(500,100);
+    //digital.Write(BUZZER, HIGH);
+    //delay(100);
+    //digital.Write(BUZZER, LOW);
     Serial.println(leitura_teclas);
     switch (leitura_teclas){
      case '#':         
@@ -439,12 +462,13 @@ void getNovaSenha(int user, int senha){
         senhaTemp[h] = leitura_teclas;
       }else{
         lcd.setCursor(0,1);
-        lcd.print("Pressione #");
+        lcd.print("Pressione #     ");
       }
       h++;
     }
   }
 }
+
 void tom(int frequencia, int duracao){
   float periodo = 1000.0/frequencia; //Periodo em ms
   for (int i = 0; i< duracao/(periodo);i++){ //Executa a rotina de dentro o tanta de vezes que a frequencia desejada cabe dentro da duracao
